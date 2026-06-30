@@ -1,18 +1,18 @@
-# 03 � Stateless Workloads: Pods & Deployments
+# 03 — Stateless Workloads: Pods & Deployments
 
-> **Prerequisites:** [02 � Namespaces: Virtual Clusters & Resource Governance](./02-namespaces.md)
+> **Prerequisites:** [02 — Namespaces: Virtual Clusters & Resource Governance](./02-namespaces.md)
 
 ---
 
-## ���� Theory: The Workload Hierarchy
+## 🧠 Theory: The Workload Hierarchy
 
 ```
 You interact with:   Deployment / StatefulSet / DaemonSet
-                              ��� manages
+                              ↓ manages
                          ReplicaSet
-                              ��� manages
+                              ↓ manages
                             Pods
-                              ��� contains
+                              ↓ contains
                           Container(s)
 ```
 
@@ -22,25 +22,25 @@ You almost never create Pods directly. You create a **Deployment** or **Stateful
 
 This diagram shows every resource used in this project and how they connect:
 
-![Kubernetes Architecture ��� All Objects](../assets/kubernetes-architecture.jpg)
+![Kubernetes Architecture — All Objects](../assets/kubernetes-architecture.jpg)
 
 **How to read this diagram:**
 
-- **Top-left legend:** A reference card for every K8s object type. Use it as a cheat sheet ��� each shape/colour maps to a specific resource kind.
-- **User ��� Internet ��� Ingress:** All external traffic enters through the Nginx Ingress Controller, which routes to the correct Service based on path or host.
-- **Inside the Namespace (`my-app`):** This is where your application lives. Notice it's sandboxed ��� resources in other namespaces can't conflict with these names.
-- **Service ��� Deployment ��� Pods:** The API (stateless) side. The Service has a stable ClusterIP. The Deployment manages 3 identical, interchangeable Pods.
-- **Service ��� StatefulSet ��� Pods:** The Database (stateful) side. Each pod (`mydb-0`, `mydb-1`, `mydb-2`) has its own identity and its own PVC ��� PV chain.
+- **Top-left legend:** A reference card for every K8s object type. Use it as a cheat sheet — each shape/colour maps to a specific resource kind.
+- **User → Internet → Ingress:** All external traffic enters through the Nginx Ingress Controller, which routes to the correct Service based on path or host.
+- **Inside the Namespace (`my-app`):** This is where your application lives. Notice it's sandboxed — resources in other namespaces can't conflict with these names.
+- **Service → Deployment → Pods:** The API (stateless) side. The Service has a stable ClusterIP. The Deployment manages 3 identical, interchangeable Pods.
+- **Service → StatefulSet → Pods:** The Database (stateful) side. Each pod (`mydb-0`, `mydb-1`, `mydb-2`) has its own identity and its own PVC → PV chain.
 - **Config & Secrets (top-right):** ConfigMap and Secret objects injected into pods as environment variables.
 - **HPA (right side):** Watches the Deployment. Scales replicas based on CPU/memory.
 - **PDB (right side):** Guards the Deployment during node drains.
 - **Namespace (bottom-left):** A visual reminder that the Namespace itself is a K8s resource you must create first.
 
-> **The key pattern:** Every connection is managed by a Kubernetes **controller** watching for state changes. Labels + selectors do the binding ��� nothing is wired up manually.
+> **The key pattern:** Every connection is managed by a Kubernetes **controller** watching for state changes. Labels + selectors do the binding — nothing is wired up manually.
 
 ---
 
-## Pod ��� The Atomic Unit
+## Pod — The Atomic Unit
 
 A Pod is the smallest deployable unit. It wraps **one or more containers** that:
 - Share the same network interface (same IP, `localhost` is shared)
@@ -63,7 +63,7 @@ Pods are ephemeral by design. Every time a Pod is created, it gets a new IP addr
 ### Pod Lifecycle States
 
 | State | Meaning |
-|-------|---------|
+|-------|---------| 
 | `Pending` | Pod accepted, but containers not started yet (waiting for node, image pull) |
 | `Running` | At least one container is running |
 | `Succeeded` | All containers completed successfully (Jobs only) |
@@ -75,7 +75,7 @@ Pods are ephemeral by design. Every time a Pod is created, it gets a new IP addr
 ### Raw YAML ([k8s-scripts/pod.yaml](../k8s-scripts/pod.yaml))
 
 ```yaml
-# pod.yaml ��� for learning only; use a Deployment in production
+# pod.yaml — for learning only; use a Deployment in production
 apiVersion: v1
 kind: Pod
 metadata:
@@ -90,13 +90,13 @@ spec:
       imagePullPolicy: Never    # Use the locally loaded Minikube image
 
       ports:
-        - containerPort: 5000   # Documentation only ��� does not open the port
+        - containerPort: 5000   # Documentation only — does not open the port
 
       env:
         - name: NODE_ENV
           value: "production"
         - name: JWT_SECRET
-          value: "replace-me"   # Never hardcode real secrets ��� use a Secret resource
+          value: "replace-me"   # Never hardcode real secrets — use a Secret resource
 
       resources:
         requests:
@@ -122,7 +122,7 @@ spec:
         failureThreshold: 5     # Container is restarted after 5 consecutive failures
 ```
 
-### ��� Try It: Apply and Observe a Pod
+### 🛠️ Try It: Apply and Observe a Pod
 
 ```bash
 # Make sure the taskflow namespace exists first
@@ -133,11 +133,11 @@ kubectl apply -f k8s-scripts/pod.yaml
 
 # Watch it start up
 kubectl get pod taskflow-api-pod -n taskflow -w
-# Should go: Pending ��� Running
+# Should go: Pending → Running
 
 # Inspect it
 kubectl describe pod taskflow-api-pod -n taskflow
-# Read the Events section at the bottom ��� shows every step K8s took
+# Read the Events section at the bottom — shows every step K8s took
 
 # Check the probe results
 kubectl describe pod taskflow-api-pod -n taskflow | grep -A 5 "Readiness\|Liveness"
@@ -145,28 +145,28 @@ kubectl describe pod taskflow-api-pod -n taskflow | grep -A 5 "Readiness\|Livene
 # See the logs
 kubectl logs taskflow-api-pod -n taskflow
 
-# Now simulate a crash ��� delete the pod
+# Now simulate a crash — delete the pod
 kubectl delete pod taskflow-api-pod -n taskflow
 
 # Try to get it again
 kubectl get pod taskflow-api-pod -n taskflow
 # Error: pod "taskflow-api-pod" not found
-# ��� This is the problem. No one recreated it. Use a Deployment instead.
+# ⚠️ This is the problem. No one recreated it. Use a Deployment instead.
 ```
 
-> **What you just proved:** A naked Pod is NOT self-healing. When it's deleted ��� by you, a crash, or a node failure ��� it stays dead. This is exactly why Deployments exist.
+> **What you just proved:** A naked Pod is NOT self-healing. When it's deleted — by you, a crash, or a node failure — it stays dead. This is exactly why Deployments exist.
 
 ---
 
-## Deployment ��� Managing Stateless Replicas
+## Deployment — Managing Stateless Replicas
 
 A Deployment manages a set of identical, interchangeable Pods (stateless). It wraps a **ReplicaSet** which actually manages the Pods.
 
 **Why Deployment over a naked Pod?**
-- ԣ� **Self-healing:** if a Pod dies, the Deployment creates a new one
-- ԣ� **Scaling:** `replicas: 3` ��� `replicas: 10` instantly
-- ԣ� **Rolling updates:** update image with zero downtime
-- ԣ� **Rollback:** `kubectl rollout undo` if the new version is broken
+- ✅ **Self-healing:** if a Pod dies, the Deployment creates a new one
+- ✅ **Scaling:** `replicas: 3` → `replicas: 10` instantly
+- ✅ **Rolling updates:** update image with zero downtime
+- ✅ **Rollback:** `kubectl rollout undo` if the new version is broken
 
 ### Rolling Update: Zero-Downtime Deploys
 
@@ -174,27 +174,27 @@ This project uses `maxUnavailable: 0` and `maxSurge: 1`:
 
 ```
 Initial state (3 pods running, all old version):
-  [api-abc] [api-def] [api-ghi]   ��� old pods
+  [api-abc] [api-def] [api-ghi]   ← old pods
 
 Step 1: Create 1 new pod (4 pods total):
-  [api-abc] [api-def] [api-ghi]   ��� old
-  [api-xyz]                        ��� new (starting...)
+  [api-abc] [api-def] [api-ghi]   ← old
+  [api-xyz]                        ← new (starting...)
 
 Step 2: New pod passes readiness probe:
-  [api-abc] [api-def] [api-ghi]   ��� old (serving)
-  [api-xyz]                        ��� new (serving)
+  [api-abc] [api-def] [api-ghi]   ← old (serving)
+  [api-xyz]                        ← new (serving)
 
 Step 3: Kill 1 old pod (back to 3):
-  [api-def] [api-ghi]             ��� old
-  [api-xyz]                        ��� new
+  [api-def] [api-ghi]             ← old
+  [api-xyz]                        ← new
 
   ... repeat until all replaced ...
 
 Final state:
-  [api-xyz] [api-uvw] [api-rst]   ��� all new
+  [api-xyz] [api-uvw] [api-rst]   ← all new
 ```
 
-**The readiness probe is the gatekeeper.** If the new pod fails the readiness probe, the rollout pauses ��� old pods keep serving. No downtime.
+**The readiness probe is the gatekeeper.** If the new pod fails the readiness probe, the rollout pauses — old pods keep serving. No downtime.
 
 ### Raw YAML ([k8s-scripts/deployment.yaml](../k8s-scripts/deployment.yaml))
 
@@ -222,7 +222,7 @@ spec:
       labels:
         app: api
       annotations:
-        # sha256 of ConfigMap/Secret content ��� changes here trigger a rolling restart
+        # sha256 of ConfigMap/Secret content — changes here trigger a rolling restart
         checksum/config: "abc123..."
         checksum/secret: "def456..."
 
@@ -262,7 +262,7 @@ spec:
             failureThreshold: 5
 ```
 
-### ��� Try It: Apply and Observe a Deployment
+### 🛠️ Try It: Apply and Observe a Deployment
 
 ```bash
 # Apply the ConfigMap and Secret first (Deployment needs them to start)
@@ -272,7 +272,7 @@ kubectl apply -f k8s-scripts/secret.yaml
 # Create the Deployment
 kubectl apply -f k8s-scripts/deployment.yaml
 
-# Watch pods come up ��� notice random hash names (not taskflow-api-0, 1, 2)
+# Watch pods come up — notice random hash names (not taskflow-api-0, 1, 2)
 kubectl get pods -n taskflow -w
 
 # See the ReplicaSet that Deployment created automatically
@@ -301,7 +301,7 @@ kubectl rollout history deployment/taskflow-api -n taskflow
 kubectl rollout undo deployment/taskflow-api -n taskflow
 ```
 
-> **What you just proved:** Deployments self-heal, scale, and roll out ��� all without downtime. But notice the problem: all config is hardcoded in the YAML. To run this in staging with 1 replica, you'd need a second copy of the file. We'll solve this in [Chapter 05 ��� Helm](./08-helm.md).
+> **What you just proved:** Deployments self-heal, scale, and roll out — all without downtime. But notice the problem: all config is hardcoded in the YAML. To run this in staging with 1 replica, you'd need a second copy of the file. We'll solve this in [Chapter 05 — Helm](./08-helm.md).
 
 ### Rollback Commands
 
@@ -328,8 +328,8 @@ Answers: **"Is this container still alive?"**
 ---
 
 > [!NOTE]
-> StatefulSets (for databases like MongoDB) are covered in [07 � StatefulSets](./07-statefulsets.md), after you've learned about Persistent Volumes in [06 � Storage](./06-storage.md).
+> StatefulSets (for databases like MongoDB) are covered in [07 — StatefulSets](./07-statefulsets.md), after you've learned about Persistent Volumes in [06 — Storage](./06-storage.md).
 
 ---
 
-**Next:** [04 � Networking: Services, Ingress, and DNS ?](./04-networking.md)
+**Next:** [04 — Networking: Services, Ingress, and DNS →](./04-networking.md)
