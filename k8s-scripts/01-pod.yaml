@@ -1,0 +1,49 @@
+# 01-pod.yaml — for learning only; use a Deployment in production
+apiVersion: v1
+kind: Pod
+metadata:
+  name: taskflow-api-pod
+  namespace: taskflow
+  labels:
+    app: api                    # Services use this label to find and route to this pod
+spec:
+  containers:
+    - name: api
+      image: ghcr.io/senghaniheet/taskflow-api:latest
+      imagePullPolicy: Never    # Use the locally loaded Minikube image
+
+      ports:
+        - containerPort: 5000   # Documentation only — does not open the port
+
+      env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "5000"
+        - name: MONGO_URI
+          value: "mongodb://mongo:27017/taskflow"
+        - name: JWT_SECRET
+          value: "replace-me"   # Never hardcode real secrets — use a Secret resource
+
+      resources:
+        requests:
+          cpu: 200m             # 200 millicores = 0.2 of one CPU core
+          memory: 128Mi
+        limits:
+          cpu: 1000m            # 1000m = 1 full CPU core; container is throttled if exceeded
+          memory: 512Mi         # Container is OOMKilled if it exceeds this
+
+      readinessProbe:
+        httpGet:
+          path: /api/health
+          port: 5000
+        initialDelaySeconds: 5
+        periodSeconds: 10
+
+      livenessProbe:
+        httpGet:
+          path: /api/health
+          port: 5000
+        initialDelaySeconds: 15
+        periodSeconds: 15
+        failureThreshold: 5     # Container is restarted after 5 consecutive failures

@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: demo-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+    app: kube-prometheus-stack
+spec:
+  groups:
+  - name: demo-alerts
+    rules:
+    - alert: PodHighCPU
+      expr: sum(rate(container_cpu_usage_seconds_total[1m])) by (pod) > 0.2
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU detected in pod"
+        description: "CPU usage > threshold for 1 minute"

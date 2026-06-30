@@ -1,0 +1,19 @@
+{{- if .Values.api.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "taskflow.fullname" . }}-api
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" . | nindent 4 }}
+    release: {{ .Values.api.serviceMonitor.release | default "monitoring" }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "taskflow.selectorLabels" . | nindent 6 }}
+      app: api
+  endpoints:
+    - port: http
+      path: {{ .Values.api.serviceMonitor.path | default "/api/metrics" }}
+      interval: {{ .Values.api.serviceMonitor.interval | default "15s" }}
+{{- end }}

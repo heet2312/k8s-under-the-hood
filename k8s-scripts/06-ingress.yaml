@@ -1,0 +1,32 @@
+# 06-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: taskflow-ingress
+  namespace: taskflow
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx     # Selects the Nginx Ingress Controller to handle this resource
+
+  rules:
+    - host: "taskflow.local"
+      http:
+        paths:
+          # More specific path must come first — evaluated top to bottom
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  number: 5000
+
+          - path: /
+            pathType: Prefix  # Catch-all: matches everything not matched above
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80

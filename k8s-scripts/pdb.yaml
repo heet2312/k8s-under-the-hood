@@ -1,0 +1,18 @@
+# 11-pdb.yaml
+# Applies during voluntary disruptions only (node drain, upgrades).
+# Does NOT protect against hardware failures or OOMKilled crashes.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: taskflow-api-pdb
+  namespace: taskflow
+  labels:
+    app: api
+spec:
+  # With 3 replicas: at most 1 pod can be taken down at a time during maintenance
+  maxUnavailable: 1
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: taskflow
+      app: api

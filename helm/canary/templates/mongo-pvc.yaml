@@ -1,0 +1,13 @@
+{{- if .Values.mongo.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "taskflow.fullname" . }}-mongo-pvc
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mongo.storageSize }}
+{{- end }}

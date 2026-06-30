@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "taskflow.fullname" . }}-api-config
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" . | nindent 4 }}
+    app: api
+data:
+  NODE_ENV: {{ .Values.api.env.nodeEnv | quote }}
+  PORT: {{ .Values.api.env.port | quote }}
+  LOG_LEVEL: {{ .Values.api.env.logLevel | default "info" | quote }}
+  JWT_EXPIRES_IN: {{ .Values.api.env.jwtExpiresIn | quote }}
+  ALLOWED_ORIGINS: {{ .Values.api.env.allowedOrigins | quote }}
+  DISABLE_RATE_LIMIT: {{ .Values.api.env.disableRateLimit | default "false" | quote }}
+  {{- if eq .Values.api.env.otelEnabled "true" }}
+  NODE_OPTIONS: "--import ./src/instrumentation.js"
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.api.env.otelExporterOtlpEndpoint | quote }}
+  OTEL_SERVICE_NAME: "taskflow-api"
+  {{- end }}

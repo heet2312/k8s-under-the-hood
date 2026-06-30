@@ -1,0 +1,17 @@
+# 05-service-nodeport.yaml — for development/testing only; use Ingress in production
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-nodeport
+  namespace: taskflow
+  labels:
+    app: api
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30500         # Static port on every node (valid range: 30000–32767)
+  selector:
+    app.kubernetes.io/name: taskflow
+    app: api

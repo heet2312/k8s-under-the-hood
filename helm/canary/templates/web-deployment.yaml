@@ -1,0 +1,57 @@
+{{- range $track, $config := .Values.web.deployments }}
+{{- if $config.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "taskflow.fullname" $ }}-web-{{ $track }}
+  namespace: {{ $.Values.namespace | default $.Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" $ | nindent 4 }}
+    app: web
+    track: {{ $track }}
+spec:
+  {{- if not $.Values.web.autoscaling.enabled }}
+  replicas: {{ $config.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "taskflow.selectorLabels" $ | nindent 6 }}
+      app: web
+      track: {{ $track }}
+  template:
+    metadata:
+      labels:
+        {{- include "taskflow.selectorLabels" $ | nindent 8 }}
+        app: web
+        track: {{ $track }}
+    spec:
+      containers:
+        - name: web
+          image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
+          imagePullPolicy: {{ $config.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: 80
+          resources:
+            {{- toYaml $.Values.web.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 10
+{{- end }}
+{{- end }}

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k6-load-generator
+  namespace: taskflow
+spec:
+  restartPolicy: Never
+  containers:
+    - name: k6
+      image: grafana/k6:latest
+      command: ["k6", "run", "/scripts/loadtest.js"]
+      env:
+        - name: API_URL
+          value: "http://ingress-nginx-controller.ingress-nginx.svc.cluster.local"
+        - name: HEADERS_HOST
+          value: "taskflow.local"
+      volumeMounts:
+        - name: script-vol
+          mountPath: /scripts
+  volumes:
+    - name: script-vol
+      configMap:
+        name: loadtest-config

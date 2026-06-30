@@ -1,0 +1,40 @@
+{{- if .Values.api.autoscaling.enabled -}}
+{{- range $color, $config := .Values.api.deployments }}
+{{- if $config.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "taskflow.fullname" $ }}-api-{{ $color }}
+  namespace: {{ $.Values.namespace | default $.Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" $ | nindent 4 }}
+    app: api
+    color: {{ $color }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "taskflow.fullname" $ }}-api-{{ $color }}
+  minReplicas: {{ $.Values.api.autoscaling.minReplicas }}
+  maxReplicas: {{ $.Values.api.autoscaling.maxReplicas }}
+  metrics:
+    {{- if $.Values.api.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $.Values.api.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if $.Values.api.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $.Values.api.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,110 @@
+# Default values for taskflow.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: taskflow
+
+mongo:
+  enabled: true
+  externalIP: ""
+  image:
+    repository: mongo
+    tag: "7"
+    pullPolicy: IfNotPresent
+  storageSize: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+api:
+  productionTarget: "blue"
+  deployments:
+    blue:
+      enabled: true
+      replicaCount: 3
+      image:
+        repository: ghcr.io/senghaniheet/taskflow-api
+        tag: latest
+        pullPolicy: Always
+    green:
+      enabled: false
+      replicaCount: 3
+      image:
+        repository: ghcr.io/senghaniheet/taskflow-api
+        tag: next
+        pullPolicy: Always
+  env:
+    nodeEnv: production
+    port: "5000"
+    logLevel: "http"
+    mongoUri: "mongodb://mongo:27017/taskflow"
+    jwtExpiresIn: "1d"
+    allowedOrigins: "http://localhost:8080,http://taskflow.local"
+    jwtSecret: ""
+    disableRateLimit: "true"
+    otelEnabled: "true"
+    otelExporterOtlpEndpoint: "http://tempo.monitoring.svc.cluster.local:4317"
+  resources:
+    requests:
+      cpu: 200m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 60
+    targetMemoryUtilizationPercentage: 80
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+  serviceMonitor:
+    enabled: true
+    interval: 5s
+    path: /api/metrics
+    release: monitoring
+
+web:
+  productionTarget: "green"
+  deployments:
+    blue:
+      enabled: false
+      replicaCount: 3
+      image:
+        repository: ghcr.io/senghaniheet/taskflow-web
+        tag: latest
+        pullPolicy: Always
+    green:
+      enabled: true
+      replicaCount: 3
+      image:
+        repository: ghcr.io/senghaniheet/taskflow-web
+        tag: 1.0.1
+        pullPolicy: Always
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 150m
+      memory: 128Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  host: taskflow.local

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crash-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crash-test
+  template:
+    metadata:
+      labels:
+        app: crash-test
+    spec:
+      containers:
+      - name: crash-test
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+            echo "Application starting..."
+            echo "Database connection failed!"
+            exit 1

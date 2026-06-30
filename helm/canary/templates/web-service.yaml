@@ -1,0 +1,23 @@
+{{- range $track, $config := .Values.web.deployments }}
+{{- if $config.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ if eq $track "stable" }}web{{ else }}web-{{ $track }}{{ end }}
+  namespace: {{ $.Values.namespace | default $.Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" $ | nindent 4 }}
+    app: web
+    track: {{ $track }}
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    {{- include "taskflow.selectorLabels" $ | nindent 4 }}
+    app: web
+    track: {{ $track }}
+  type: ClusterIP
+{{- end }}
+{{- end }}

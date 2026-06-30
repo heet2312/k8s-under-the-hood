@@ -1,0 +1,55 @@
+/* Dashboard.css */
+
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-metrics {
+  margin-bottom: var(--space-8);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.bg-brand-subtle { background: var(--color-brand-subtle); color: var(--color-brand); }
+.bg-success-subtle { background: var(--color-success-bg); color: var(--color-success); }
+.bg-info-subtle { background: var(--color-info-bg); color: var(--color-info); }
+
+.stat-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.dashboard-section {
+  margin-bottom: var(--space-8);
+}
+
+.dashboard-section h2 {
+  font-size: var(--text-xl);
+}
+
+.project-card {
+  height: 100%;
+}

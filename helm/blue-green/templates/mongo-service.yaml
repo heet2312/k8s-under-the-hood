@@ -1,0 +1,35 @@
+{{- if or .Values.mongo.enabled .Values.mongo.externalIP }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" . | nindent 4 }}
+    app: mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  {{- if .Values.mongo.enabled }}
+  selector:
+    {{- include "taskflow.selectorLabels" . | nindent 4 }}
+    app: mongo
+  {{- end }}
+{{- end }}
+---
+{{- if and (not .Values.mongo.enabled) .Values.mongo.externalIP }}
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: mongo
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" . | nindent 4 }}
+    app: mongo
+subsets:
+  - addresses:
+      - ip: {{ .Values.mongo.externalIP | quote }}
+    ports:
+      - port: 27017
+{{- end }}

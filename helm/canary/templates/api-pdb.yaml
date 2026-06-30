@@ -1,0 +1,28 @@
+{{- if $.Values.api.pdb.enabled }}
+{{- range $track, $config := .Values.api.deployments }}
+{{- if $config.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "taskflow.fullname" $ }}-api-{{ $track }}
+  namespace: {{ $.Values.namespace | default $.Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" $ | nindent 4 }}
+    app: api
+    track: {{ $track }}
+spec:
+  {{- if $.Values.api.pdb.minAvailable }}
+  minAvailable: {{ $.Values.api.pdb.minAvailable }}
+  {{- end }}
+  {{- if $.Values.api.pdb.maxUnavailable }}
+  maxUnavailable: {{ $.Values.api.pdb.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "taskflow.selectorLabels" $ | nindent 6 }}
+      app: api
+      track: {{ $track }}
+{{- end }}
+{{- end }}
+{{- end }}

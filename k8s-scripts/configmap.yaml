@@ -1,0 +1,21 @@
+# 07-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskflow-api-config   # Referenced in Deployment's envFrom → configMapRef
+  namespace: taskflow
+  labels:
+    app: api
+data:
+  NODE_ENV: "production"
+  PORT: "5000"
+  LOG_LEVEL: "http"           # Winston levels: http | info | warn | error
+  JWT_EXPIRES_IN: "1d"
+  ALLOWED_ORIGINS: "http://localhost:8080,http://taskflow.local"
+  DISABLE_RATE_LIMIT: "false"
+
+  # OTel vars — only included when otelEnabled="true" in Helm values
+  # NODE_OPTIONS bootstraps the tracer before index.js loads (required for ESM)
+  NODE_OPTIONS: "--import ./src/instrumentation.js"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo.monitoring.svc.cluster.local:4317"
+  OTEL_SERVICE_NAME: "taskflow-api"

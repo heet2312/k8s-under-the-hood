@@ -1,0 +1,11 @@
+# 00-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taskflow
+  labels:
+    # key=value pairs used for grouping and filtering resources
+    app.kubernetes.io/managed-by: helm
+    environment: production
+
+

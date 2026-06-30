@@ -1,0 +1,17 @@
+# 09-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: taskflow-mongo-pvc    # Referenced by the StatefulSet's volumes section
+  namespace: taskflow
+spec:
+  accessModes:
+    - ReadWriteOnce           # One node can mount for read/write at a time (correct for MongoDB)
+
+  resources:
+    requests:
+      storage: 5Gi
+
+  # storageClassName omitted → uses cluster default
+  # Minikube default: "standard" (hostPath on local disk)
+  # Production (GKE, EKS): "ssd", "gp2", etc.

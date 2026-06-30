@@ -1,0 +1,33 @@
+# 10-hpa.yaml
+# Requires metrics-server addon: minikube addons enable metrics-server
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: taskflow-api-hpa
+  namespace: taskflow
+  labels:
+    app: api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: taskflow-api          # Must match the Deployment name exactly
+
+  minReplicas: 3               # Floor — never scale below this
+  maxReplicas: 10              # Ceiling — never scale above this
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          # Formula: desiredReplicas = ceil(currentReplicas × (currentCPU% / 60))
+          averageUtilization: 60
+
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80

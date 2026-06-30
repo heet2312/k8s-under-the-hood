@@ -1,0 +1,70 @@
+{{- range $color, $config := .Values.api.deployments }}
+{{- if $config.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "taskflow.fullname" $ }}-api-{{ $color }}
+  namespace: {{ $.Values.namespace | default $.Release.Namespace }}
+  labels:
+    {{- include "taskflow.labels" $ | nindent 4 }}
+    app: api
+    color: {{ $color }}
+spec:
+  {{- if not $.Values.api.autoscaling.enabled }}
+  replicas: {{ $config.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "taskflow.selectorLabels" $ | nindent 6 }}
+      app: api
+      color: {{ $color }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/api-configmap.yaml") $ | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/api-secret.yaml") $ | sha256sum }}
+      labels:
+        {{- include "taskflow.selectorLabels" $ | nindent 8 }}
+        app: api
+        color: {{ $color }}
+    spec:
+      containers:
+        - name: api
+          image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
+          imagePullPolicy: {{ $config.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: {{ include "taskflow.fullname" $ }}-api-config
+            - secretRef:
+                name: {{ include "taskflow.fullname" $ }}-api-secret
+          resources:
+            {{- toYaml $.Values.api.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 8
+            successThreshold: 1
+            failureThreshold: 5
+{{- end }}
+{{- end }}
