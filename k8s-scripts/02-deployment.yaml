@@ -35,6 +35,8 @@ spec:
         checksum/secret: "def456..."
 
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret   # Created via kubectl — see docs/09-cicd.md
       containers:
         - name: api
           image: ghcr.io/senghaniheet/taskflow-api:v1.0.0
