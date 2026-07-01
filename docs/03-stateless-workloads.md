@@ -109,6 +109,10 @@ echo "YOUR_PAT" | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
 # Login Succeeded
 ```
 
+> [!TIP]
+> **Replace `senghaniheet` with your GitHub username** in every command below.
+> The full image name format is: `ghcr.io/YOUR_GITHUB_USERNAME/taskflow-api:v1.0.0`
+
 ### Step 3 — Build and Push the API Image
 
 ```bash
@@ -185,7 +189,7 @@ metadata:
 spec:
   containers:
     - name: api
-      image: ghcr.io/senghaniheet/taskflow-api:v1.0.0   # use the tag you pushed above
+      image: ghcr.io/senghaniheet/taskflow-api:v1.0.0   # ⚠️ replace senghaniheet with YOUR username
       imagePullPolicy: IfNotPresent  # pull only if not already cached locally
 
       ports:
@@ -328,7 +332,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/senghaniheet/taskflow-api:v1.0.0
+          image: ghcr.io/senghaniheet/taskflow-api:v1.0.0   # ⚠️ replace senghaniheet with YOUR username
           imagePullPolicy: IfNotPresent  # pull only when image is not cached locally
 
           envFrom:

@@ -196,6 +196,10 @@ spec:
 
 **Deployment — one per colour** ([helm/blue-green/templates/web-deployment.yaml](../helm/blue-green/templates/web-deployment.yaml)):
 
+> [!NOTE]
+> **Replace the image repository.** Change `ghcr.io/senghaniheet/...` to `ghcr.io/YOUR_GITHUB_USERNAME/...`
+> in all `values.yaml` files under `helm/blue-green/` and `helm/canary/` before running any `helm upgrade`.
+
 ```yaml
 # Helm loops over the deployments map and creates one Deployment per colour
 # range $color, $config := .Values.web.deployments
@@ -216,7 +220,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: "ghcr.io/senghaniheet/taskflow-web:v1.0.0"
+          image: "ghcr.io/senghaniheet/taskflow-web:v1.0.0"   # ⚠️ replace senghaniheet with YOUR username
 ```
 
 **Values file — controlling the switch:**
@@ -230,13 +234,13 @@ web:
     blue:
       enabled: true
       image:
-        repository: ghcr.io/senghaniheet/taskflow-web
+        repository: ghcr.io/senghaniheet/taskflow-web   # ⚠️ replace with YOUR username
         tag: "v1.0.0"        # Current stable version
 
     green:
       enabled: true
       image:
-        repository: ghcr.io/senghaniheet/taskflow-web
+        repository: ghcr.io/senghaniheet/taskflow-web   # ⚠️ replace with YOUR username
         tag: "v2.0.0"        # New version — staged and tested, no traffic yet
 ```
 

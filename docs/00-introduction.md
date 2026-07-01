@@ -10,10 +10,14 @@
 
 Docker solves the "works on my machine" problem. You package your app + its dependencies into an **image**. That image runs identically anywhere Docker is installed.
 
+> [!NOTE]
+> **Replace the package name.** Every image in this guide uses `ghcr.io/senghaniheet/...` as an example.
+> Wherever you see `senghaniheet`, substitute your own GitHub username.
+
 ```
 Your code + Node.js 20 + all npm packages
          ↓ docker build
-Image: ghcr.io/senghaniheet/taskflow-api:latest
+Image: ghcr.io/YOUR_GITHUB_USERNAME/taskflow-api:latest
          ↓ docker run
 Container running on port 5000
 ```

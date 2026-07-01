@@ -82,10 +82,13 @@ All configurable settings live in one file. Every template pulls its values from
 # helm/taskflow/values.yaml (excerpt)
 namespace: taskflow
 
+> [!NOTE]
+> **Replace the image repository.** Change `ghcr.io/senghaniheet/...` to `ghcr.io/YOUR_GITHUB_USERNAME/...` in `values.yaml` and any `--set` commands before running `helm install`.
+
 api:
   replicaCount: 3
   image:
-    repository: ghcr.io/senghaniheet/taskflow-api
+    repository: ghcr.io/senghaniheet/taskflow-api   # ⚠️ change senghaniheet → your username
     tag: v1.0.0          # Change for releases: --set api.image.tag=v1.0.1
     pullPolicy: IfNotPresent
   env:
@@ -248,6 +251,7 @@ helm show values grafana/loki        # Inspect a chart's configurable values
 helm install loki grafana/loki-stack # Install from registry (no local download needed)
 
 # OCI-based registries (Docker Hub, GHCR, ECR) — modern standard
+# ⚠️ Replace senghaniheet with YOUR GitHub username in the commands below
 helm push ./helm/taskflow/ oci://ghcr.io/senghaniheet/helm-charts
 helm install taskflow oci://ghcr.io/senghaniheet/helm-charts/taskflow --version 1.2.0
 

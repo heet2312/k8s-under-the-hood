@@ -125,7 +125,7 @@ spec:
     - name: ghcr-pull-secret   # ← this
   containers:
     - name: api
-      image: ghcr.io/senghaniheet/taskflow-api:v1.0.0
+      image: ghcr.io/senghaniheet/taskflow-api:v1.0.0   # ⚠️ replace senghaniheet with YOUR username
 ```
 
 Kubernetes will automatically use this secret when pulling any `ghcr.io` image.
