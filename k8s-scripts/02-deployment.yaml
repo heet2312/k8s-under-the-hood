@@ -37,9 +37,8 @@ spec:
     spec:
       containers:
         - name: api
-          # CI publishes sha-<full-git-sha> — replace the placeholder with your commit SHA
-          image: ghcr.io/senghaniheet/taskflow-api:sha-0000000000000000000000000000000000000000
-          imagePullPolicy: IfNotPresent   # SHA tags are immutable; IfNotPresent avoids redundant pulls
+          image: ghcr.io/senghaniheet/taskflow-api:v1.0.0
+          imagePullPolicy: IfNotPresent
 
           securityContext:
             allowPrivilegeEscalation: false

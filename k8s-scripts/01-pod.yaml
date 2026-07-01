@@ -9,10 +9,8 @@ metadata:
 spec:
   containers:
     - name: api
-      # Image is published by CI as sha-<full-git-sha> — see .github/workflows/deploy.yml
-      # For local Minikube use: minikube image load ghcr.io/senghaniheet/taskflow-api:sha-<SHA>
-      image: ghcr.io/senghaniheet/taskflow-api:sha-0000000000000000000000000000000000000000
-      imagePullPolicy: Never    # Use the locally loaded Minikube image
+      image: ghcr.io/senghaniheet/taskflow-api:v1.0.0
+      imagePullPolicy: IfNotPresent
 
       ports:
         - containerPort: 5000   # Documentation only — does not open the port

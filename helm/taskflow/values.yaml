@@ -24,10 +24,8 @@ api:
   replicaCount: 3
   image:
     repository: ghcr.io/senghaniheet/taskflow-api
-    # CI publishes sha-<full-git-sha>; override at deploy time:
-    # helm upgrade taskflow ./helm/taskflow --set api.image.tag=sha-<SHA>
-    tag: sha-0000000000000000000000000000000000000000
-    pullPolicy: IfNotPresent  # SHA tags are immutable; IfNotPresent avoids redundant pulls
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
   env:
     nodeEnv: production
     port: "5000"
@@ -65,10 +63,8 @@ web:
   replicaCount: 3
   image:
     repository: ghcr.io/senghaniheet/taskflow-web
-    # CI publishes sha-<full-git-sha>; override at deploy time:
-    # helm upgrade taskflow ./helm/taskflow --set web.image.tag=sha-<SHA>
-    tag: sha-0000000000000000000000000000000000000000
-    pullPolicy: IfNotPresent  # SHA tags are immutable; IfNotPresent avoids redundant pulls
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
   resources:
     requests:
       cpu: 50m
