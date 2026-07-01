@@ -40,6 +40,107 @@ This diagram shows every resource used in this project and how they connect:
 
 ---
 
+## 📦 Before You Apply Anything — Build & Push Your Image to GHCR
+
+> [!IMPORTANT]
+> Kubernetes **pulls images from a registry**. If you run `kubectl apply` before your image exists in GHCR, every pod will immediately enter `ImagePullBackOff`. Complete this section first — it only takes a few minutes.
+
+### What is GHCR?
+
+GitHub Container Registry (`ghcr.io`) is GitHub's built-in Docker registry. It lets you store and pull private or public container images alongside your code — no separate Docker Hub account needed.
+
+### Step 1 — Create a Personal Access Token (PAT)
+
+Docker login to GHCR requires a GitHub Personal Access Token, **not** your GitHub password.
+
+1. Go to: `https://github.com/settings/tokens/new`
+2. Fill in:
+   - **Note:** `ghcr-push`
+   - **Expiration:** 90 days
+   - **Scopes:** tick `write:packages` and `read:packages`
+3. Click **Generate token** — copy it immediately, GitHub shows it only once
+
+```
+ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    ↑ your token looks like this
+```
+
+### Step 2 — Log in to GHCR
+
+```bash
+# Replace YOUR_GITHUB_USERNAME and YOUR_PAT with your actual values
+echo "YOUR_PAT" | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+
+# Expected output:
+# Login Succeeded
+```
+
+### Step 3 — Build and Push the API Image
+
+```bash
+# Build the API image from the server/ directory
+# Replace senghaniheet with YOUR GitHub username
+docker build -t ghcr.io/senghaniheet/taskflow-api:v1.0.0 ./server
+
+# Push it to GHCR (this creates the package automatically)
+docker push ghcr.io/senghaniheet/taskflow-api:v1.0.0
+
+# Also tag it as latest for convenience
+docker tag ghcr.io/senghaniheet/taskflow-api:v1.0.0 ghcr.io/senghaniheet/taskflow-api:latest
+docker push ghcr.io/senghaniheet/taskflow-api:latest
+```
+
+### Step 4 — Build and Push the Web Image
+
+```bash
+# Build the Web (React) image from the client/ directory
+docker build -t ghcr.io/senghaniheet/taskflow-web:v1.0.0 ./client
+
+# Push it to GHCR
+docker push ghcr.io/senghaniheet/taskflow-web:v1.0.0
+
+docker tag ghcr.io/senghaniheet/taskflow-web:v1.0.0 ghcr.io/senghaniheet/taskflow-web:latest
+docker push ghcr.io/senghaniheet/taskflow-web:latest
+```
+
+### Step 5 — Make the Package Visible (if private)
+
+By default, new GHCR packages are private. Kubernetes needs a pull secret to access them.
+
+**Option A — Make the package public (easiest for learning):**
+1. Go to `https://github.com/YOUR_USERNAME?tab=packages`
+2. Click `taskflow-api` → **Package settings** → **Change visibility → Public**
+3. Repeat for `taskflow-web`
+
+**Option B — Keep it private and create a Kubernetes pull secret:**
+```bash
+kubectl create secret docker-registry ghcr-pull-secret \
+  --docker-server=ghcr.io \
+  --docker-username=YOUR_GITHUB_USERNAME \
+  --docker-password=YOUR_PAT \
+  --namespace=taskflow
+
+# Then add this to your pod/deployment spec:
+# imagePullSecrets:
+#   - name: ghcr-pull-secret
+```
+
+> See [09 — CI/CD](./09-cicd.md) for the full guide on private packages and automating this with GitHub Actions.
+
+### Verify your images are in GHCR
+
+```bash
+# Pull it back to confirm it's accessible
+docker pull ghcr.io/senghaniheet/taskflow-api:v1.0.0
+# Untagged: ghcr.io/senghaniheet/taskflow-api:v1.0.0
+# ...
+# Status: Image is up to date for ghcr.io/senghaniheet/taskflow-api:v1.0.0
+```
+
+Now your images exist in the registry. Kubernetes can pull them. Continue below. ✅
+
+---
+
 ## Pod — The Atomic Unit
 
 A Pod is the smallest deployable unit. It wraps **one or more containers** that:
@@ -63,7 +164,7 @@ Pods are ephemeral by design. Every time a Pod is created, it gets a new IP addr
 ### Pod Lifecycle States
 
 | State | Meaning |
-|-------|---------| 
+|-------|---------|
 | `Pending` | Pod accepted, but containers not started yet (waiting for node, image pull) |
 | `Running` | At least one container is running |
 | `Succeeded` | All containers completed successfully (Jobs only) |
@@ -73,6 +174,8 @@ Pods are ephemeral by design. Every time a Pod is created, it gets a new IP addr
 | `ImagePullBackOff` | Cannot pull the container image (wrong tag, auth failure) |
 
 ### Raw YAML ([k8s-scripts/pod.yaml](../k8s-scripts/pod.yaml))
+
+
 
 ```yaml
 # pod.yaml — for learning only; use a Deployment in production
