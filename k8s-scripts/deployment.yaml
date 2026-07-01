@@ -37,8 +37,9 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/senghaniheet/taskflow-api:latest
-          imagePullPolicy: Always   # Always pull so CI/CD new images are picked up
+          # CI publishes sha-<full-git-sha> — replace the placeholder with your commit SHA
+          image: ghcr.io/senghaniheet/taskflow-api:sha-0000000000000000000000000000000000000000
+          imagePullPolicy: IfNotPresent   # SHA tags are immutable; IfNotPresent avoids redundant pulls
 
           securityContext:
             allowPrivilegeEscalation: false
