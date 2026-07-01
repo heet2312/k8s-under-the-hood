@@ -298,7 +298,7 @@ kubectl describe pod <api-pod-name> -n taskflow | grep -A 10 "Limits\|Requests"
 # kubectl apply -f k8s-scripts/pdb.yaml
 # That's 10 separate files, applied in a specific dependency order.
 # What if you forget one? What if order changes? What about staging?
-# Chapter 05 — Helm — solved all of this.
+# Chapter 08 — Helm — solved all of this.
 
 # ── Part 3: Full HPA Scale Test ──────────────────────────────
 

@@ -40,10 +40,44 @@ This diagram shows every resource used in this project and how they connect:
 
 ---
 
+## Pod — The Atomic Unit
+
+A Pod is the smallest deployable unit. It wraps **one or more containers** that:
+- Share the same network interface (same IP, `localhost` is shared)
+- Share the same storage volumes
+- Are always scheduled on the same node
+
+### Why Not Just Use Pods Directly?
+
+```
+You create a naked Pod: kubectl apply -f pod.yaml
+Pod crashes.
+Kubernetes does NOT recreate it.
+Your app is down.
+```
+
+Pods are ephemeral by design. Every time a Pod is created, it gets a new IP address. Nothing in a Pod is guaranteed to persist.
+
+**Use a Deployment instead.** Deployments guarantee your desired replica count is always running.
+
+### Pod Lifecycle States
+
+| State | Meaning |
+|-------|---------|
+| `Pending` | Pod accepted, but containers not started yet (waiting for node, image pull) |
+| `Running` | At least one container is running |
+| `Succeeded` | All containers completed successfully (Jobs only) |
+| `Failed` | All containers exited, at least one with failure |
+| `CrashLoopBackOff` | Container keeps crashing; K8s is backing off retries exponentially |
+| `OOMKilled` | Container exceeded its memory limit and was killed |
+| `ImagePullBackOff` | Cannot pull the container image (wrong tag, missing auth, private registry) |
+
+---
+
 ## 📦 Before You Apply Anything — Build & Push Your Image to GHCR
 
 > [!IMPORTANT]
-> Kubernetes **pulls images from a registry**. If you run `kubectl apply` before your image exists in GHCR, every pod will immediately enter `ImagePullBackOff`. Complete this section first — it only takes a few minutes.
+> Kubernetes **pulls images from a registry**. If you run `kubectl apply` before your image exists in GHCR, every pod will immediately enter `ImagePullBackOff` (see lifecycle table above). Complete this section first — it only takes a few minutes.
 
 ### What is GHCR?
 
@@ -139,44 +173,6 @@ docker pull ghcr.io/senghaniheet/taskflow-api:v1.0.0
 
 Now your images exist in the registry. Kubernetes can pull them. Continue below. ✅
 
----
-
-## Pod — The Atomic Unit
-
-A Pod is the smallest deployable unit. It wraps **one or more containers** that:
-- Share the same network interface (same IP, `localhost` is shared)
-- Share the same storage volumes
-- Are always scheduled on the same node
-
-### Why Not Just Use Pods Directly?
-
-```
-You create a naked Pod: kubectl apply -f pod.yaml
-Pod crashes.
-Kubernetes does NOT recreate it.
-Your app is down.
-```
-
-Pods are ephemeral by design. Every time a Pod is created, it gets a new IP address. Nothing in a Pod is guaranteed to persist.
-
-**Use a Deployment instead.** Deployments guarantee your desired replica count is always running.
-
-### Pod Lifecycle States
-
-| State | Meaning |
-|-------|---------|
-| `Pending` | Pod accepted, but containers not started yet (waiting for node, image pull) |
-| `Running` | At least one container is running |
-| `Succeeded` | All containers completed successfully (Jobs only) |
-| `Failed` | All containers exited, at least one with failure |
-| `CrashLoopBackOff` | Container keeps crashing; K8s is backing off retries exponentially |
-| `OOMKilled` | Container exceeded its memory limit and was killed |
-| `ImagePullBackOff` | Cannot pull the container image (wrong tag, auth failure) |
-
-### Raw YAML ([k8s-scripts/pod.yaml](../k8s-scripts/pod.yaml))
-
-
-
 ```yaml
 # pod.yaml — for learning only; use a Deployment in production
 apiVersion: v1
@@ -189,8 +185,8 @@ metadata:
 spec:
   containers:
     - name: api
-      image: ghcr.io/senghaniheet/taskflow-api:latest
-      imagePullPolicy: Never    # Use the locally loaded Minikube image
+      image: ghcr.io/senghaniheet/taskflow-api:v1.0.0   # use the tag you pushed above
+      imagePullPolicy: IfNotPresent  # pull only if not already cached locally
 
       ports:
         - containerPort: 5000   # Documentation only — does not open the port
@@ -332,8 +328,8 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/senghaniheet/taskflow-api:latest
-          imagePullPolicy: Always   # Always pull so CI/CD new images are picked up
+          image: ghcr.io/senghaniheet/taskflow-api:v1.0.0
+          imagePullPolicy: IfNotPresent  # pull only when image is not cached locally
 
           envFrom:
             - configMapRef:

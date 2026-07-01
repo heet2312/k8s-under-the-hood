@@ -145,23 +145,26 @@ kubectl get pods -n kube-system
 kubectl get pods -n kube-system | grep -E "apiserver|etcd|scheduler|controller"
 # These are the 4 control plane components you learned in Chapter 00
 
-# ── Part 3: Observe a Running Pod ────────────────────────────
-# (deploy the app first if not already done — see Quick Start in KUBERNETES_GRAFANA_PROMETHEUS_GUIDE.md)
-kubectl get pods -n taskflow
-kubectl describe pod <api-pod-name> -n taskflow
+# ── Part 3: Observe a Running Pod (using kube-system) ───────
+# ⏭️  The taskflow namespace doesn't exist yet — you'll deploy your first pod
+#    in Chapter 03. For now, observe the K8s system pods that are always running:
+kubectl get pods -n kube-system
+# Pick any pod name from the output (e.g. etcd-minikube) and describe it:
+kubectl describe pod etcd-minikube -n kube-system
 # Look for these sections:
 #   Node:        → which node (always minikube in local setup)
-#   Status:      → Running, Pending, Failed
+#   Status:      → Running
 #   Containers:  → image, ports, resource limits
 #   Conditions:  → PodScheduled, Initialized, Ready
 #   Events:      → the history of what happened to this pod
 
-# ── Part 4: Prove kubectl exec ───────────────────────────────
-kubectl exec -it <api-pod-name> -n taskflow -- sh
-nslookup mongo          # → proves the Headless Service DNS works
-nslookup api            # → proves the ClusterIP Service DNS works
-env | grep NODE_ENV     # → proves ConfigMap injection worked
-exit
+# ── Part 4: kubectl exec ──────────────────────────────────────
+# ⏭️  Skipped here — exec into your own app pods in Chapter 04 after deploying
+#    the API and Services. You will then run:
+#      kubectl exec -it <api-pod-name> -n taskflow -- sh
+#      nslookup mongo        # proves Headless Service DNS
+#      nslookup api          # proves ClusterIP DNS
+#      env | grep NODE_ENV   # proves ConfigMap injection
 ```
 
 **What to notice:**

@@ -1,6 +1,6 @@
-﻿# 16 — Deployment Strategies: Rolling Update, Blue-Green & Canary
+# 16 — Deployment Strategies: Rolling Update, Blue-Green & Canary
 
-> **Prerequisites:** [Previous Chapter](./15-tracing.md) | [06 — CI/CD](./09-cicd.md) | [07 — Reliability](./10-reliability.md)
+> **Prerequisites:** [Previous Chapter](./15-tracing.md) | [09 — CI/CD](./09-cicd.md) | [10 — Reliability](./10-reliability.md)
 
 ---
 

@@ -442,18 +442,20 @@ StatefulSet Pod: taskflow-mongo-0
 **Goal:** Trace a complete request through every layer of the networking stack.
 
 ```bash
-# ── Step 1: Apply everything in order ───────────────────────
+# ── Step 1: Apply everything in order ────────────────────────
 kubectl apply -f k8s-scripts/namespace.yaml
 kubectl apply -f k8s-scripts/configmap.yaml
 kubectl apply -f k8s-scripts/secret.yaml
-kubectl apply -f k8s-scripts/pvc.yaml
-kubectl apply -f k8s-scripts/statefulset.yaml
+# ⏭️  PVC and StatefulSet are covered in Chapters 06–07 (Storage and StatefulSets).
+#    Apply them after Chapter 07. The API will run without MongoDB for now;
+#    requests that hit the database will return a 500, which is fine for
+#    the networking exercises below.
 kubectl apply -f k8s-scripts/deployment.yaml
 kubectl apply -f k8s-scripts/service-clusterip.yaml
 kubectl apply -f k8s-scripts/ingress.yaml
 
-# Notice: 8 separate commands just to get to a working app.
-# This is the exact problem we solve in Chapter 05 with Helm.
+# Notice: 6 separate commands just to get a partial working stack.
+# This is the exact problem we solve in Chapter 08 with Helm.
 
 # ── Step 2: Inspect the full networking stack ────────────────
 kubectl get all -n taskflow                   # Everything in one view
@@ -479,4 +481,4 @@ kubectl logs -l app=api -n taskflow -f --max-log-requests=10
 
 ---
 
-**Next:** [Next Chapter](./05-configuration.md)
+**Next:** [05 — Configuration: ConfigMaps and Secrets →](./05-configuration.md)

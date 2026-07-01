@@ -86,8 +86,8 @@ api:
   replicaCount: 3
   image:
     repository: ghcr.io/senghaniheet/taskflow-api
-    tag: latest
-    pullPolicy: Always
+    tag: v1.0.0          # Change for releases: --set api.image.tag=v1.0.1
+    pullPolicy: IfNotPresent
   env:
     nodeEnv: "production"
     logLevel: "http"
@@ -385,7 +385,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/senghaniheet/taskflow-api:latest  # ← hardcoded image+tag
+          image: ghcr.io/senghaniheet/taskflow-api:v1.0.0  # ← must edit for every release
           imagePullPolicy: Always
 
           envFrom:

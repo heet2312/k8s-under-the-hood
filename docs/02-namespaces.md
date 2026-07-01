@@ -156,9 +156,12 @@ Paired with [`kubectx`](https://github.com/ahmetb/kubectx) (which switches betwe
 **Goal:** Explore namespaces and understand how isolation works in practice.
 
 ```bash
-# ── Step 1: List all namespaces ──────────────────────────────
+# ── Step 1: List all namespaces ────────────────────────────
 kubectl get namespaces
-# You should see: default, kube-system, kube-public, taskflow, monitoring, ingress-nginx
+# You should see: default, kube-system, kube-public
+# ⏭️  taskflow is created in Chapter 03 when you deploy your first pod
+#    monitoring and ingress-nginx appear in Chapter 11 (Observability)
+#    Only seeing 3 namespaces here is expected.
 
 # ── Step 2: Compare resources across namespaces ──────────────
 kubectl get pods -n taskflow       # App workloads
@@ -172,11 +175,14 @@ kubectl get svc -n monitoring
 # Notice: a service named "api" in taskflow and "prometheus" in monitoring
 # coexist without any conflict
 
-# ── Step 4: Prove cross-namespace DNS works ───────────────────
-kubectl exec -it <api-pod-name> -n taskflow -- sh
-nslookup monitoring-grafana.monitoring.svc.cluster.local
-# → resolves to Grafana's ClusterIP — cross-namespace communication works!
-exit
+# ── Step 4: Cross-namespace DNS ───────────────────────────
+# ⏭️  Skipped here — the API pod doesn't exist yet.
+#    Complete this step in Chapter 04 (Networking) after deploying the app:
+#
+#      kubectl exec -it <api-pod-name> -n taskflow -- sh
+#      nslookup monitoring-grafana.monitoring.svc.cluster.local
+#      # → resolves to Grafana's ClusterIP — cross-namespace communication works!
+#      exit
 
 # ── Step 5: Apply and inspect a ResourceQuota ────────────────
 kubectl apply -f k8s-scripts/resource-quota.yaml

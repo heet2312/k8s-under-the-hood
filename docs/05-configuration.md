@@ -101,7 +101,7 @@ kubectl edit configmap taskflow-api-config -n taskflow
 kubectl rollout restart deployment/taskflow-api -n taskflow
 ```
 
-> **The hardcoded problem:** Notice `LOG_LEVEL: "http"` is hardcoded. To run a staging environment with `LOG_LEVEL: "debug"`, you need a second copy of this file. In Chapter 05, Helm solves this with `{{ .Values.api.env.logLevel }}`.
+> **The hardcoded problem:** Notice `LOG_LEVEL: "http"` is hardcoded. To run a staging environment with `LOG_LEVEL: "debug"`, you need a second copy of this file. In Chapter 08, Helm solves this with `{{ .Values.api.env.logLevel }}`.
 
 ---
 
@@ -191,7 +191,7 @@ annotations:
 
 When you change the ConfigMap → its sha256 changes → the annotation changes → Kubernetes detects a Pod template change → triggers a rolling update → all pods reload the new config.
 
-In Chapter 05, Helm automates this checksum calculation automatically.
+In Chapter 08, Helm automates this checksum calculation automatically.
 
 ---
 
@@ -224,16 +224,16 @@ kubectl exec -it <new-api-pod-name> -n taskflow -- env | grep LOG_LEVEL
 # → LOG_LEVEL=debug
 
 # ── Part 4: Count what you've applied so far ─────────────────
-# kubectl apply -f k8s-scripts/namespace.yaml    ← chapter 01
+# kubectl apply -f k8s-scripts/namespace.yaml    ← chapter 02
 # kubectl apply -f k8s-scripts/configmap.yaml    ← this chapter
 # kubectl apply -f k8s-scripts/secret.yaml       ← this chapter
-# kubectl apply -f k8s-scripts/pvc.yaml          ← chapter 01
-# kubectl apply -f k8s-scripts/deployment.yaml   ← chapter 01
-# kubectl apply -f k8s-scripts/statefulset.yaml  ← chapter 01
-# kubectl apply -f k8s-scripts/service-clusterip.yaml ← chapter 02
-# kubectl apply -f k8s-scripts/ingress.yaml      ← chapter 02
+# kubectl apply -f k8s-scripts/pvc.yaml          ← chapter 06
+# kubectl apply -f k8s-scripts/statefulset.yaml  ← chapter 07
+# kubectl apply -f k8s-scripts/deployment.yaml   ← chapter 03
+# kubectl apply -f k8s-scripts/service-clusterip.yaml ← chapter 04
+# kubectl apply -f k8s-scripts/ingress.yaml      ← chapter 04
 # That's 8 files. And we still have HPA and PDB to go.
-# Chapter 05 replaces all of this with: helm install taskflow ./helm/taskflow
+# Chapter 08 replaces all of this with: helm install taskflow ./helm/taskflow
 ```
 
 **What to notice:**
@@ -243,4 +243,4 @@ kubectl exec -it <new-api-pod-name> -n taskflow -- env | grep LOG_LEVEL
 
 ---
 
-**Next:** [Next Chapter](./06-storage.md)
+**Next:** [06 — Storage: PV, PVC, and StorageClass →](./06-storage.md)
